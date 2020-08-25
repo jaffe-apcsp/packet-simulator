@@ -1,0 +1,38 @@
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.control {text-align: center;}
+.footer {font-size: 0.85em;}
+.access-code {font-size: 3rem;}
+.access-code-form {margin-bottom: 20px;}
+.access-code-form label {margin-top: 3%; font-weight: bold; font-size: 1.4em;}
+.access-code-form input {font-weight: bold; font-size: 1.4em;}
+
+.message label {font-weight: bold; font-size: 1.4em;}
+.message textarea {border-radius: 10px; font-weight: bold; font-size: 1.4em; text-align: center; width: 100%; height: 80px; padding: 6px;}
+.message {margin-bottom: 15px;}
+.message-sent {background-color: rgb(48,166,74); color: white}
+
+.packet {margin: 10px;}
+.packet-char {width: 25px; height: 30px; font-weight: bold; font-size: 1.5em; background-color: aqua; margin: 5px; font-family: monospace;}
+.packet-table {width: 100%; border-collapse: collapse;}
+.packet-header {font-weight: bold; font-size: 1.2em;}
+.packet-key {font-size: 1.1em;}
+.packet-extra {width: 100%; border-collapse: collapse; margin-top: 15px;}
+.packet-extra thead tr th {background-color: #bbb;}
+.packet-extra tbody tr td {border: 1px solid #ccc; padding: 5px 5px;}
+
+.neighbors {background-color: #bbb; padding: 5px; border-radius: 8px;}
+
+.join-button {font-size: 1.2em !important; margin-right: 15px;}
+
+.top-spacer {margin-top: 15px;}
+
+.process-table {width: 100%; border-collapse: collapse;}
+.process-table tbody tr td {text-align:left; padding: 2px 5px; border: 1px solid #666; font-size: 0.8em;}
+.process-table tbody tr td:first-child {font-weight: bold;}
+
+.received-message {font-size: 1.2em; font-weight: bold;}

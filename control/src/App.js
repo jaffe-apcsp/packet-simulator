@@ -13,6 +13,7 @@ const R = require('ramda');
 const App = props => {
 
   const [state, setState] = useState(null);
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
   const connect = (accessCode, reconnect = false) => {
     // Save the time and access code to localStorage in case the
@@ -26,7 +27,13 @@ const App = props => {
 
     // If we're not reconnecting, then initialize the state
     if (!reconnect) {
-      props.db.ref(accessCode).set(initState(accessCode));
+      props.db.ref(accessCode).set(initState(accessCode))
+        .catch(err => {
+          if (err.code === 'PERMISSION_DENIED') {
+            setPermissionDenied(true);
+          }
+          console.log(err);
+        })
     };
     // And set up a listener for changes in the Firebase state
     props.db.ref(accessCode).on('value', snap => {
@@ -66,28 +73,41 @@ const App = props => {
     props.db.ref(state.accessCode).update(payload);
   }
 
-  return (
-    <Container className="control">
-      <Card>
-        <CardHeader>
-          {
-            state ?
-              <Header {...state} db={props.db} next={next} back={back} /> :
-              <Login {...state} connect={connect} />
-          }
-        </CardHeader>
-        <CardBody>
-          {
-            state ?
-              <ComputerList {...state} db={props.db} /> : null
-          }
-        </CardBody>
-        <CardFooter>
-          <Footer {...state} db={props.db} />
-        </CardFooter>
-      </Card>
-    </Container>
-  );
+  if (permissionDenied) {
+    return (
+      <Container className="control">
+        <Card>
+          <CardHeader>
+            <h3>Unable to start session</h3>
+            <h4>Did you forget to set the Firebase rules for write access?</h4>
+          </CardHeader>
+        </Card>
+      </Container>
+    )
+  } else {
+    return (
+      <Container className="control">
+        <Card>
+          <CardHeader>
+            {
+              state ?
+                <Header {...state} db={props.db} next={next} back={back}/> :
+                <Login {...state} connect={connect}/>
+            }
+          </CardHeader>
+          <CardBody>
+            {
+              state ?
+                <ComputerList {...state} db={props.db}/> : null
+            }
+          </CardBody>
+          <CardFooter>
+            <Footer {...state} db={props.db}/>
+          </CardFooter>
+        </Card>
+      </Container>
+    );
+  }
 }
 
 export default App;

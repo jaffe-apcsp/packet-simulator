@@ -4,39 +4,25 @@ import C from "system-constants";
 
 const R = require('ramda');
 
-const ProcessPackets = props => {
-
-  const [passable, setPassable] = useState([]);
-  const [keys, setKeys] = useState([]);
-
-  useEffect(() => {
-    setPassable(R.take(C.PASSABLE_PACKET_COUNT, props.othersPackets));
-  }, [props.othersPackets]);
-
-  useEffect(() => {
-    let newKeys = passable.map(packet => packet.key);
-    let removed = R.difference(keys, newKeys);
-    let added = R.difference(newKeys, keys);
-    let _keys = R.without(removed, keys);
-    _keys = R.concat(_keys, added);
-    setKeys(_keys);
-  }, [passable, keys])
+const ProcessPacketsInCards = props => {
 
   const move = evt => {
     props.passTriggered();
     const packetKey = evt.currentTarget.getAttribute('packet-key')
     const moveToComputerId = evt.currentTarget.getAttribute('move-to');
-    props.db.ref(props.accessCode+'/packets/'+packetKey).update({holder: moveToComputerId});
+    props.db.ref(props.accessCode + '/packets/' + packetKey).update({holder: moveToComputerId});
   }
 
   const keep = evt => {
     props.passTriggered();
     const packetKey = evt.currentTarget.getAttribute('packet-key')
-    props.db.ref(props.accessCode+'/packets/'+packetKey).update({locked: true});
+    props.db.ref(props.accessCode + '/packets/' + packetKey).update({locked: true});
   }
 
-  return keys.map(key => {
-    let packet = props.packets[key];
+  let packets = Object.values(props.packets);
+  packets = packets.filter(packet => packet.to !== props.computerId);
+  packets = R.take(C.PASSABLE_PACKET_COUNT, packets);
+  return packets.map(packet => {
     return (
       <Col md={4} key={packet.key} className="top-spacer">
         <Card>
@@ -77,41 +63,41 @@ const ProcessPackets = props => {
           </CardBody>
           <CardFooter>
             <Row>
-                {
-                  packet.to === props.computerId ? null :
-                    <Col md={6}>
-                      <Button className="text-left"
-                              size="sm"
-                              onClick={move}
-                              disabled={!props.allowPass}
-                              packet-key={packet.key}
-                              move-to={props.leftComputerId}
-                              color="primary">{'< MOVE LEFT'}</Button>
-                    </Col>
-                }
-                {
-                  packet.to !== props.computerId ? null :
-                    <Col md={{size:6, offset:3}}>
-                      <Button className="text-center"
-                              size="sm"
-                              disabled={!props.allowPass}
-                              onClick={keep}
-                              packet-key={packet.key}
-                              color="success">KEEP!</Button>
-                    </Col>
-                }
-                {
-                  packet.to === props.computerId ? null :
-                    <Col md={6}>
-                      <Button className="text-right"
-                              size="sm"
-                              disabled={!props.allowPass}
-                              onClick={move}
-                              packet-key={packet.key}
-                              move-to={props.rightComputerId}
-                              color="primary">{'MOVE RIGHT >'}</Button>
-                    </Col>
-                }
+              {
+                packet.to === props.computerId ? null :
+                  <Col md={6}>
+                    <Button className="text-left"
+                            size="sm"
+                            onClick={move}
+                            disabled={!props.allowPass}
+                            packet-key={packet.key}
+                            move-to={props.leftComputerId}
+                            color="primary">{'< MOVE LEFT'}</Button>
+                  </Col>
+              }
+              {
+                packet.to !== props.computerId ? null :
+                  <Col md={{size: 6, offset: 3}}>
+                    <Button className="text-center"
+                            size="sm"
+                            disabled={!props.allowPass}
+                            onClick={keep}
+                            packet-key={packet.key}
+                            color="success">KEEP!</Button>
+                  </Col>
+              }
+              {
+                packet.to === props.computerId ? null :
+                  <Col md={6}>
+                    <Button className="text-right"
+                            size="sm"
+                            disabled={!props.allowPass}
+                            onClick={move}
+                            packet-key={packet.key}
+                            move-to={props.rightComputerId}
+                            color="primary">{'MOVE RIGHT >'}</Button>
+                  </Col>
+              }
             </Row>
           </CardFooter>
         </Card>
@@ -120,4 +106,4 @@ const ProcessPackets = props => {
   });
 }
 
-export default ProcessPackets;
+export default ProcessPacketsInCards;

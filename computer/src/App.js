@@ -2,7 +2,7 @@ import React, { useState, useReducer } from 'react';
 import reducer from "./reducer";
 import Login from "./Login";
 import Header from './Header';
-import Process from './Process';
+import ProcessHeader from './ProcessHeader';
 import MessageInput from "./MessageInput";
 import Footer from './Footer';
 import { Container, Card, CardHeader, CardBody, CardFooter } from 'reactstrap';
@@ -10,24 +10,35 @@ import C from "system-constants";
 
 const App = props => {
 
-  const [state, dispatch] = useReducer(reducer, {accessCode:null});
+  const [appState, dispatch] = useReducer(reducer, {accessCode:null});
   const [dbState, setDbState] = useState(null);
+  const [invalidSession, setInvalidSession] = useState(false);
 
   const join = obj => {
-    props.db.ref(obj.accessCode).on('value', snap => {
-      setDbState(snap.val());
-    });
     dispatch({type: C.JOIN, computerId: obj.computerId, name: obj.name});
-    if (!obj.rejoin) {
-      props.db.ref(obj.accessCode+'/computers/'+obj.computerId).set({
-        key: obj.computerId,
-        name: obj.name,
-        lastPing: (new Date()).getTime()
-      });
-    } else {
-      props.db.ref(obj.accessCode+'/computers/'+obj.computerId).update({name: obj.name});
-    }
+    props.db.ref(obj.accessCode).on('value', snap => {
+      let data = snap.val();
+      if (data.accessCode) {
+        setDbState(data);
+      } else {
+        setInvalidSession(true);
+        localStorage.removeItem(C.LOCAL_STORAGE_KEY);
+      }
+    });
+    props.db.ref(obj.accessCode+'/computers/'+obj.computerId).set({
+      key: obj.computerId,
+      name: obj.name,
+      lastPing: (new Date()).getTime()
+    });
   };
+
+  const rejoin = obj => {
+    let { accessCode, name, computerId } = obj;
+    dispatch({type: C.JOIN, computerId, name});
+    props.db.ref(accessCode).on('value', snap => {
+      setDbState(snap.val());
+    })
+  }
 
   let cardBody = null;
   if (dbState) {
@@ -37,12 +48,12 @@ const App = props => {
 
       case C.WRITE_MESSAGES:
         cardBody = (
-          <MessageInput db={props.db} {...state} {...dbState} />
+          <MessageInput db={props.db} appState={appState} dbState={dbState} />
         )
         break;
 
       case C.PLAY:
-        cardBody = <Process db={props.db} {...state} {...dbState} />
+        cardBody = <ProcessHeader db={props.db} appState={appState} dbState={dbState} />
         break;
 
       default:
@@ -55,7 +66,12 @@ const App = props => {
       <Card>
         <CardHeader>
           {
-            dbState ? <Header {...state} {...dbState} /> : <Login dispatch={dispatch} join={join} />
+            dbState ?
+              <Header appState={appState} dbState={dbState} /> :
+              <Login dispatch={dispatch}
+                     invalidSession={invalidSession}
+                     join={join}
+                     rejoin={rejoin} />
           }
         </CardHeader>
         <CardBody>

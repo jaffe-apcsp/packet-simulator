@@ -9,8 +9,8 @@ const Header = props => {
   const [removed, setRemoved] = useState(false);
 
   useEffect(() => {
-    setRemoved(!props.computers || props.computers[props.computerId] === undefined);
-  }, [props.computerId, props.computers]);
+    setRemoved(!props.dbState.computers || props.dbState.computers[props.appState.computerId] === undefined);
+  }, [props.appState.computerId, props.dbState.computers]);
 
   useEffect(() => {
     if (!removed) return;
@@ -21,7 +21,7 @@ const Header = props => {
   if (removed) {
     header = <Col><HeaderRemoved /></Col>
   } else {
-    switch (props.gameState) {
+    switch (props.dbState.gameState) {
       case C.STANDBY:
         header = <Col>
           <HeaderId {...props} />

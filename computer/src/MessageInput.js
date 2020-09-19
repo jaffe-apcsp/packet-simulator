@@ -29,50 +29,50 @@ const MessageInput = props => {
       return {
         key: generatePacketId(),
         header: false,
-        from: props.computerId,
-        to: props.computers[props.computerId].to,
+        from: props.appState.computerId,
+        to: props.dbState.computers[props.appState.computerId].to,
         packetNumber: idx+1,
         outOf: packetTextArray.length+1,
         payload: packetText,
-        holder: props.computerId,
+        holder: props.appState.computerId,
         locked: false
       }
     });
     let packetHeader = {
       key: generatePacketId(),
       header: true,
-      from: props.computerId,
-      to: props.computers[props.computerId].to,
+      from: props.appState.computerId,
+      to: props.dbState.computers[props.appState.computerId].to,
       outOf: packetTextArray.length+1,
-      holder: props.computerId,
+      holder: props.appState.computerId,
       locked: false
     }
     setPackets(R.concat([packetHeader], packetArray));
-  }, [message, props.computers, props.computerId]);
+  }, [message, props.dbState.computers, props.appState.computerId]);
 
   const send = () => {
-    props.db.ref(props.accessCode+'/computers/'+props.computerId+'/locked').set(true);
+    props.db.ref(props.dbState.accessCode+'/computers/'+props.appState.computerId+'/locked').set(true);
     let packetObjs = packets.reduce((obj, packet) => {
       obj[packet.key] = packet;
       return obj;
     }, {});
-    props.db.ref(props.accessCode+'/packets').update(packetObjs);
+    props.db.ref(props.dbState.accessCode+'/packets').update(packetObjs);
   }
 
   return (
     <>
       <Row className="message">
         <Col md={12}>
-          <Label>Enter your message to {props.computers[props.computers[props.computerId].to].name} below ({C.MAX_MESSAGE_LENGTH - message.length} character{C.MAX_MESSAGE_LENGTH - message.length === 1 ? '' : 's'} left)</Label>
+          <Label>Enter your message to {props.dbState.computers[props.dbState.computers[props.appState.computerId].to].name} below ({C.MAX_MESSAGE_LENGTH - message.length} character{C.MAX_MESSAGE_LENGTH - message.length === 1 ? '' : 's'} left)</Label>
         </Col>
       </Row>
       <Row className="message">
         <Col md={{size: 7, offset: 1}}>
-          <textarea value={message} onChange={onChange} className={props.computers[props.computerId].locked ? 'message-sent' : ''} />
+          <textarea value={message} onChange={onChange} className={props.dbState.computers[props.appState.computerId].locked ? 'message-sent' : ''} />
         </Col>
         <Col md={{size: 2, offset: 1}}>
           {
-            props.computers[props.computerId].locked ?
+            props.dbState.computers[props.appState.computerId].locked ?
               <Button block color="success">Message sent!</Button> :
               <Button block color="primary" onClick={send} disabled={message.length === 0}>Send</Button>
           }

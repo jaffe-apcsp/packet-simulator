@@ -10,6 +10,7 @@
 .access-code-form {margin-bottom: 20px;}
 .access-code-form label {margin-top: 3%; font-weight: bold; font-size: 1.4em;}
 .access-code-form input {font-weight: bold; font-size: 1.4em;}
+.top-separator {margin-top: 15px;}
 
 .message label {font-weight: bold; font-size: 1.4em;}
 .message textarea {border-radius: 10px; font-weight: bold; font-size: 1.4em; text-align: center; width: 100%; height: 80px; padding: 6px;}
@@ -35,4 +36,7 @@
 .process-table tbody tr td {text-align:left; padding: 2px 5px; border: 1px solid #666; font-size: 0.8em;}
 .process-table tbody tr td:first-child {font-weight: bold;}
 
-.received-message {font-size: 1.2em; font-weight: bold;}
+.received-message-label {font-size: 1.2em; font-weight: bold;}
+.received-message {font-size: 1.2em; font-weight: bold; font-family: Consolas, monospace;}
+
+.error {color: red;}

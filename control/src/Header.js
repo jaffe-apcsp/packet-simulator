@@ -9,10 +9,10 @@ const Header = props => {
   let header;
   switch (props.gameState) {
     case C.STANDBY:
-      header = <span>Access code: {props.accessCode}</span>;
+      header = <span>Access code: {props.accessCode}<br/>URL: https://packet.mrjaffesclass.com</span>;
       break;
 
-    case C.ADDRESS_WRITE:
+    case C.WRITE_MESSAGES:
       header = <span>Write your message</span>;
       break;
 

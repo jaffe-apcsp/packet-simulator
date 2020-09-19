@@ -9,8 +9,7 @@ const reducer = (_state, action) => {
 
   switch (action.type) {
     case C.JOIN:
-      state.computerId = action.computerId
-      state.accessCode = action.accessCode;
+      state.computerId = action.computerId;
       state.name = action.name;
       break
 

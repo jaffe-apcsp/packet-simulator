@@ -8,24 +8,12 @@ const Login = props => {
 
   const [accessCode, setAccessCode] = useState('');
   const [name, setName] = useState('');
-  const [computerId, setComputerId] = useState('');
-  const [enableRestoreSession, setEnableRestoreSession] = useState(false);
   const [enableLogin, setEnableLogin] = useState(false);
+  const [previousSession, setPreviousSession] = useState(null);
 
   useEffect(() => {
-    let data = JSON.parse(localStorage.getItem(C.LOCAL_STORAGE_KEY));
-    let now = (new Date()).getTime();
-    if (data && (data.timestamp + C.FIVE_MINUTES > now)) {
-      setAccessCode(data.accessCode);
-      setName(data.name);
-      setComputerId(data.computerId);
-      setEnableRestoreSession(true);
-    } else {
-      setAccessCode('');
-      setName('');
-      setComputerId('');
-      setEnableRestoreSession(false);
-    }
+    let previousSession = JSON.parse(localStorage.getItem(C.LOCAL_STORAGE_KEY));
+    setPreviousSession(previousSession);
   }, [])
 
   useEffect(() => {
@@ -49,16 +37,18 @@ const Login = props => {
 
   const onClick = () => {
     let computerId = generateId();
-    let now = (new Date()).getTime();
-    localStorage.setItem(C.LOCAL_STORAGE_KEY, JSON.stringify({accessCode, name, computerId, timestamp: now}));
-    props.join({accessCode, name, computerId, rejoin: false});
+    let timestamp = (new Date()).getTime();
+    let id = {accessCode, name, computerId, timestamp};
+    localStorage.setItem(C.LOCAL_STORAGE_KEY, JSON.stringify(id));
+    props.join({accessCode, name, computerId});
   }
 
   const rejoin = () => {
-    let now = (new Date()).getTime();
-    localStorage.setItem(C.LOCAL_STORAGE_KEY, JSON.stringify({accessCode, name, computerId, timestamp: now}));
-    props.join({accessCode, name, computerId, rejoin: true});
+    localStorage.setItem(C.LOCAL_STORAGE_KEY, JSON.stringify(previousSession));
+    props.rejoin(previousSession);
   }
+
+  const now = (new Date()).getTime();
 
   return (
     <>
@@ -70,8 +60,12 @@ const Login = props => {
           <Input type="text"
                  name="accessCode"
                  id="accessCode"
+                 className={props.invalidSession ? 'invalid-session' : ''}
                  value={accessCode}
                  onChange={onChangeAccessCode} />
+          {
+            props.invalidSession ? <span className="error">Invalid session ID</span> : null
+          }
         </Col>
       </Row>
       <Row className="access-code-form">
@@ -80,24 +74,32 @@ const Login = props => {
         </Col>
         <Col md={4} xs={6}>
           <Input type="text"
-                 name="accessCode"
-                 id="accessCode"
+                 name="name"
+                 id="name"
                  value={name}
                  onChange={onChangeName} />
         </Col>
       </Row>
       <Row>
-        <Col className="text-center">
+        <Col className="text-center" md={{size:6, offset: 3}}>
           <Button color="primary"
+                  block
                   className="join-button"
                   disabled={!enableLogin}
                   onClick={onClick}>JOIN THE NETWORK</Button>
-          {
-            enableRestoreSession ?
-              <Button color="primary" className="join-button" onClick={rejoin}>RESTORE SESSION</Button> : null
-          }
         </Col>
       </Row>
+        {
+          previousSession && (now - previousSession.timestamp < C.FIVE_MINUTES) ?
+            <Row>
+              <Col className="text-center" md={{size:6, offset: 3}}>
+                <Button color="primary"
+                        block
+                        className="join-button top-separator"
+                        onClick={rejoin}>REJOIN SESSION {previousSession.accessCode} AS {previousSession.name}</Button>
+              </Col>
+            </Row>: null
+        }
     </>
   );
 }

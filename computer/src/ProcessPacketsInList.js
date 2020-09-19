@@ -5,12 +5,9 @@ const R = require('ramda');
 
 const ProcessPacketsInList = props => {
 
-  const [inList, setInList] = useState([]);
-
-  useEffect(() => {
-    setInList(R.takeLast(props.othersPackets.length - C.PASSABLE_PACKET_COUNT, props.othersPackets));
-  }, [props.othersPackets]);
-
+  let packets = Object.values(props.packets);
+  packets = packets.filter(packet => packet.to !== props.computerId);
+  packets = R.drop(C.PASSABLE_PACKET_COUNT, packets);
   return (
     <table className="packet-extra">
       <thead>
@@ -28,9 +25,9 @@ const ProcessPacketsInList = props => {
       </thead>
       <tbody>
       {
-        inList.map(packet => {
+        packets.map(packet => {
           return (
-            <tr>
+            <tr key={packet.key}>
               <td>{packet.key}</td>
               <td>{props.computers[packet.from].name} ({packet.from})</td>
               <td>{props.computers[packet.to].name} ({packet.to})</td>

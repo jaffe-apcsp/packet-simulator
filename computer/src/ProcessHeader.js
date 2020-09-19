@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import ProcessPackets from "./ProcessPackets";
+import ProcessPacketsInCards from "./ProcessPacketsInCards";
 import MyPackets from './MyPackets';
 import ProcessPacketsInList from "./ProcessPacketsInList";
+import Message from "./Message";
 import { Row, Col, Button } from 'reactstrap';
 import C from "system-constants";
 
 const R = require('ramda');
 
-const Process = props => {
+const ProcessHeader = props => {
 
   const [activeTab, setActiveTab] = useState('process');
   const [leftComputerId, setLeftComputerId] = useState(null);
@@ -24,64 +25,74 @@ const Process = props => {
   }
 
   useEffect(() => {
-    let idx = props.ring.findIndex(id => id === props.computerId);
+    let idx = props.dbState.ring.findIndex(id => id === props.appState.computerId);
     if (idx < 0) return;
-    let leftIdx = idx === 0 ? props.ring.length - 1 : idx - 1;
-    let rightIdx = idx + 1 === props.ring.length ? 0 : idx + 1;
-    setLeftComputerId(props.ring[leftIdx]);
-    setRightComputerId(props.ring[rightIdx]);
-  }, [props.ring, props.computerId])
+    let leftIdx = idx === 0 ? props.dbState.ring.length - 1 : idx - 1;
+    let rightIdx = idx + 1 === props.dbState.ring.length ? 0 : idx + 1;
+    setLeftComputerId(props.dbState.ring[leftIdx]);
+    setRightComputerId(props.dbState.ring[rightIdx]);
+  }, [props.dbState.ring, props.appState.computerId])
 
-  const allPackets = Object.keys(props.packets).map(id => props.packets[id]);
-  const packetsImHolding = R.filter(packet => packet.holder === props.computerId, allPackets);
-  const [myPackets, othersPackets] = R.partition(packet => packet.locked && packet.to === props.computerId, packetsImHolding);
+  const allPackets = Object.values(props.dbState.packets);
+  const packetsImHolding = allPackets.filter(packet => packet.holder === props.appState.computerId);
 
   let view = null;
   if (activeTab === 'process') {
     view = (
       <>
-        <ProcessPackets {...props}
-                        allowPass={allowPass}
-                        passTriggered={passTriggered}
-                        othersPackets={othersPackets}
-                        leftComputerId={leftComputerId}
-                        rightComputerId={rightComputerId} />
-        <ProcessPacketsInList {...props}
-                              othersPackets={othersPackets} />
+        <ProcessPacketsInCards db={props.db}
+                               computers={props.dbState.computers}
+                               computerId={props.appState.computerId}
+                               accessCode={props.dbState.accessCode}
+                               allowPass={allowPass}
+                               packets={packetsImHolding}
+                               passTriggered={passTriggered}
+                               leftComputerId={leftComputerId}
+                               rightComputerId={rightComputerId} />
+        <ProcessPacketsInList computers={props.dbState.computers}
+                              computerId={props.appState.computerId}
+                              packets={packetsImHolding} />
       </>
     )
   } else if (activeTab === 'mine') {
-    view = <MyPackets {...props}
-                      myPackets={myPackets} />
+    view = <MyPackets computers={props.dbState.computers}
+                      computerId={props.appState.computerId}
+                      packets={packetsImHolding} />
   }
-
-  let messagePackets = myPackets.filter(p => !p.header);
-  messagePackets = messagePackets.sort((a,b) => a.packetNumber < b.packetNumber ? -1 : 1)
-  const message = messagePackets.reduce((str, packet) => packet.header ? str : str+packet.payload, '');
 
   return (
     <>
       <Row>
         <Col md={4}>
           {
-            activeTab === 'process' ? <h4 className="neighbors">{props.computers[leftComputerId] ? "On your left is "+props.computers[leftComputerId].name : null}</h4> : null
+            activeTab === 'process' ? <h4 className="neighbors">{props.dbState.computers[leftComputerId] ? "On your left is "+props.dbState.computers[leftComputerId].name : null}</h4> : null
           }
         </Col>
         <Col md={4} className="text-center">
         {
           activeTab === 'mine' ?
-            <Button data-key="process" onClick={switchView} color="primary">Show my stack of packets to pass</Button> :
-            <Button data-key="mine" onClick={switchView} color="primary">Show packets sent to me that I've kept</Button>
+            <Button data-key="process" onClick={switchView} color="primary">Show packets to be passed</Button> :
+            <Button data-key="mine" onClick={switchView} color="primary">Show packets sent to me</Button>
         }
         </Col>
         <Col md={4}>
           {
-            activeTab === 'process' ? <h4 className="neighbors">{props.computers[rightComputerId] ? "On your right is "+props.computers[rightComputerId].name : null}</h4> : null
+            activeTab === 'process' ? <h4 className="neighbors">{props.dbState.computers[rightComputerId] ? "On your right is "+props.dbState.computers[rightComputerId].name : null}</h4> : null
           }
         </Col>
       </Row>
       {
-        activeTab === 'mine' ? <Row className="top-spacer"><Col><span className="received-message">Received message: {message}</span></Col></Row> : null
+        activeTab === 'mine' ?
+          <Row className="top-spacer">
+            <Col>
+              <span className="received-message-label">
+                Received message:&nbsp;
+              </span>
+              <Message computers={props.dbState.computers}
+                                           computerId={props.appState.computerId}
+                                           packets={packetsImHolding} />
+            </Col>
+          </Row> : null
       }
       <Row className="top-spacer">
         {view}
@@ -90,4 +101,4 @@ const Process = props => {
   );
 }
 
-export default Process;
+export default ProcessHeader;

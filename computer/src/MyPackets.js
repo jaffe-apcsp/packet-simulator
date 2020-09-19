@@ -5,18 +5,10 @@ const R = require('ramda');
 
 const MyPackets = props => {
 
-  const [myPackets, setMyPackets] = useState([]);
+  let packets = Object.values(props.packets);
+  packets = packets.filter(packet => packet.to === props.computerId);
 
-  useEffect(() => {
-    let l = R.sort((a, b) => {
-      if (a.header) return -1;
-      if (b.header) return 1;
-      return a.packetNumber < b.packetNumber ? -1 : 1
-    }, props.myPackets);
-    setMyPackets(l);
-  }, [props.myPackets]);
-
-  return myPackets.map(packet => {
+  return packets.map(packet => {
     return (
       <Col md={4} key={packet.key} className="top-spacer">
         <Card>

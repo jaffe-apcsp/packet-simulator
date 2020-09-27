@@ -14,7 +14,7 @@ exports.MOVE_LEFT = 'moveLeft';
 exports.HYDRATE = 'hydrate';
 exports.NEXT = 'next';
 
-exports.COMPUTER_ID_LENGTH = 6;
+exports.COMPUTER_ID_LENGTH = 4;
 exports.COMPUTER_ID_CHARSET = '0123456789';
 
 exports.JOIN = 'join';

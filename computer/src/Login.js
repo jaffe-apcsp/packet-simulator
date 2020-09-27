@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Button, Label, Input } from 'reactstrap';
+import { Row, Col, Button, Label, Input, Form, FormGroup } from 'reactstrap';
 import C from "system-constants";
 
 const R = require('ramda');
@@ -9,16 +9,16 @@ const Login = props => {
   const [accessCode, setAccessCode] = useState('');
   const [name, setName] = useState('');
   const [enableLogin, setEnableLogin] = useState(false);
-  const [previousSession, setPreviousSession] = useState(null);
+  const [prevComputerId, setPrevComputerId] = useState('');
 
+  // useEffect(() => {
+  //   let prevComputerId = JSON.parse(localStorage.getItem(C.LOCAL_STORAGE_KEY));
+  //   setPreviousSession(prevComputerId);
+  // }, [])
+  //
   useEffect(() => {
-    let previousSession = JSON.parse(localStorage.getItem(C.LOCAL_STORAGE_KEY));
-    setPreviousSession(previousSession);
-  }, [])
-
-  useEffect(() => {
-    setEnableLogin(accessCode.length > 0 && name.length > 0);
-  }, [accessCode, name])
+    setEnableLogin(accessCode.length > 0 && ((name.length > 0) || (prevComputerId.length > 0)));
+  }, [accessCode, name, prevComputerId])
 
   const generateId = () => {
     let chars = R.range(0, C.COMPUTER_ID_LENGTH);
@@ -31,6 +31,10 @@ const Login = props => {
     setAccessCode(evt.currentTarget.value.toUpperCase());
   };
 
+  const onChangeRejoinId = evt => {
+    setPrevComputerId(evt.currentTarget.value);
+  }
+
   const onChangeName = evt => {
     setName(evt.currentTarget.value.toUpperCase());
   };
@@ -38,17 +42,16 @@ const Login = props => {
   const onClick = () => {
     let computerId = generateId();
     let timestamp = (new Date()).getTime();
-    let id = {accessCode, name, computerId, timestamp};
-    localStorage.setItem(C.LOCAL_STORAGE_KEY, JSON.stringify(id));
-    props.join({accessCode, name, computerId});
+    // let id = {accessCode, name, computerId, timestamp};
+    // localStorage.setItem(C.LOCAL_STORAGE_KEY, JSON.stringify(id));
+    props.join({accessCode, name, computerId: prevComputerId ? prevComputerId: computerId});
   }
 
-  const rejoin = () => {
-    localStorage.setItem(C.LOCAL_STORAGE_KEY, JSON.stringify(previousSession));
-    props.rejoin(previousSession);
-  }
-
-  const now = (new Date()).getTime();
+  // const rejoin = () => {
+  //   props.rejoin(prevComputerId);
+  // }
+  //
+  // const now = (new Date()).getTime();
 
   return (
     <>
@@ -70,7 +73,7 @@ const Login = props => {
       </Row>
       <Row className="access-code-form">
         <Col md={{size:4, offset:2}} xs={6}>
-          <Label for="accessCode" className="text-right">NAME:</Label>
+          <Label for="accessCode" className="text-right">YOUR NAME:</Label>
         </Col>
         <Col md={4} xs={6}>
           <Input type="text"
@@ -80,26 +83,27 @@ const Login = props => {
                  onChange={onChangeName} />
         </Col>
       </Row>
+      <Row className="access-code-form">
+        <Col md={{size:4, offset:2}} xs={6}>
+          <Label for="computerId" className="text-right">REJOIN AS ID:</Label>
+        </Col>
+        <Col md={4} xs={6}>
+          <Input type="text"
+                 name="computerId"
+                 id="computerId"
+                 value={prevComputerId}
+                 onChange={onChangeRejoinId} />
+        </Col>
+      </Row>
       <Row>
         <Col className="text-center" md={{size:6, offset: 3}}>
           <Button color="primary"
                   block
                   className="join-button"
                   disabled={!enableLogin}
-                  onClick={onClick}>JOIN THE NETWORK</Button>
+                  onClick={onClick}>JOIN (OR REJOIN) THE NETWORK</Button>
         </Col>
       </Row>
-        {
-          previousSession && (now - previousSession.timestamp < C.FIVE_MINUTES) ?
-            <Row>
-              <Col className="text-center" md={{size:6, offset: 3}}>
-                <Button color="primary"
-                        block
-                        className="join-button top-separator"
-                        onClick={rejoin}>REJOIN SESSION {previousSession.accessCode} AS {previousSession.name}</Button>
-              </Col>
-            </Row>: null
-        }
     </>
   );
 }

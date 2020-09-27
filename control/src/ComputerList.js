@@ -1,4 +1,4 @@
-import React  from 'react';
+import React, {useState, useEffect} from 'react';
 import { Row, Col, Table } from 'reactstrap';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { AiFillLock, AiFillUnlock } from 'react-icons/ai';
@@ -7,6 +7,12 @@ import { GrEdit } from 'react-icons/gr';
 const R = require('ramda');
 
 const ComputerList = props => {
+
+  const [computerCount, setComputerCount] = useState(0);
+
+  useEffect(() => {
+    setComputerCount(props.computers ? (Object.keys(props.computers)).length : 0);
+  }, [props.computers]);
 
   const getStats = (computerId, packets) => {
     let initStats = {
@@ -21,7 +27,7 @@ const ComputerList = props => {
       const packetData = packets[packetKey];
       if (packetData.from === computerId) {
         // The packet originated from this computer
-        if ((packetData.holder === packetData.to) && packetData.locked) {
+        if (packetData.holder === packetData.to) {
           // The packet reached the destination
           stats.delivered++;
         } else {
@@ -31,7 +37,7 @@ const ComputerList = props => {
       } else {
         // The packet does NOT belong to this computer
         if (packetData.to === computerId) {
-          if ((packetData.holder === computerId) && packetData.locked) {
+          if (packetData.holder === computerId) {
             // The packet has reached this computer
             stats.received++;
           } else {
@@ -127,10 +133,11 @@ const ComputerList = props => {
         <Table size="sm">
           <thead>
             <tr>
-              <th rowSpan="2">Computer</th>
+              <th rowSpan="2">Computer ({computerCount})</th>
               <th rowSpan="2">Name</th>
               <th rowSpan="2">Packets held</th>
-              <th colSpan="4">Message packets</th>
+              <th colSpan="2">Packets from me</th>
+              <th colSpan="2">Packets to me</th>
               <th rowSpan="2">Remove</th>
             </tr>
             <tr>
@@ -148,11 +155,11 @@ const ComputerList = props => {
               <td colSpan={8} className="text-left">
                 Total packets delivered: {totalDelivered}<br />
                 Total packets not delivered: {totalNotDelivered}<br />
-                Total dropped packets: {dropped}  {
-                  dropped > 0 ?
-                    <span className="link" onClick={redistribute}>Redistribute</span> :
-                    null
-                }
+                {/*Total dropped packets: {dropped}  {*/}
+                {/*  dropped > 0 ?*/}
+                {/*    <span className="link" onClick={redistribute}>Redistribute</span> :*/}
+                {/*    null*/}
+                {/*}*/}
               </td>
             </tr>
           </tfoot>

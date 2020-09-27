@@ -86,18 +86,18 @@ const ProcessPacketsInCards = props => {
                             color="success">KEEP!</Button>
                   </Col>
               }
-              {
-                packet.to === props.computerId ? null :
-                  <Col md={6}>
-                    <Button className="text-right"
-                            size="sm"
-                            disabled={!props.allowPass}
-                            onClick={move}
-                            packet-key={packet.key}
-                            move-to={props.rightComputerId}
-                            color="primary">{'MOVE RIGHT >'}</Button>
-                  </Col>
-              }
+              {/*{*/}
+              {/*  packet.to === props.computerId ? null :*/}
+              {/*    <Col md={6}>*/}
+              {/*      <Button className="text-right"*/}
+              {/*              size="sm"*/}
+              {/*              disabled={!props.allowPass}*/}
+              {/*              onClick={move}*/}
+              {/*              packet-key={packet.key}*/}
+              {/*              move-to={props.rightComputerId}*/}
+              {/*              color="primary">{'MOVE RIGHT >'}</Button>*/}
+              {/*    </Col>*/}
+              {/*}*/}
             </Row>
           </CardFooter>
         </Card>

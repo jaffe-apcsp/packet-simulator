@@ -18,7 +18,7 @@ const Message = props => {
     if (packet) {
       return str + packet.payload;
     } else {
-      return str + R.range(0, C.PACKET_LENGTH).map(idx => '_').join(' ');
+      return str + ' ' + R.range(0, C.PACKET_LENGTH).map(idx => '_').join(' ');
     }
   }, '');
 

@@ -25,11 +25,14 @@ const App = props => {
         localStorage.removeItem(C.LOCAL_STORAGE_KEY);
       }
     });
-    props.db.ref(obj.accessCode+'/computers/'+obj.computerId).set({
+    let payload = {
       key: obj.computerId,
-      name: obj.name,
       lastPing: (new Date()).getTime()
-    });
+    }
+    if (obj.name.length > 0) {
+      payload.name = obj.name
+    }
+    props.db.ref(obj.accessCode+'/computers/'+obj.computerId).update(payload);
   };
 
   const rejoin = obj => {
